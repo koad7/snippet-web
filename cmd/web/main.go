@@ -8,16 +8,20 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/koad7/snippet-web/pkg/models/mysql"
 )
 
+// Add a snippets field to the application struct. This will allow us to
+// make the SnippetModel object available to our handlers.
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	snippets *mysql.SnippetModel
 }
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
-	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "web:mylocalpass@/snippetbox?parseTime=true", "MySQL data source name")
 	flag.Parse()
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -32,6 +36,7 @@ func main() {
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		snippets: &mysql.SnippetModel{DB: db},
 	}
 	srv := &http.Server{
 		Addr:     *addr,
