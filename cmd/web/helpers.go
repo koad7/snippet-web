@@ -36,26 +36,27 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 		td = &templateData{}
 	}
 	td.CurrentYear = time.Now().Year()
+	// Add the flash message to the template data, if one exists.
+	td.Flash = app.session.PopString(r, "flash")
 	return td
 }
 
-
 func (app *application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
-    ts, ok := app.templateCache[name]
-    if !ok {
-        app.serverError(w, fmt.Errorf("The template %s does not exist", name))
-        return
-    }
+	ts, ok := app.templateCache[name]
+	if !ok {
+		app.serverError(w, fmt.Errorf("The template %s does not exist", name))
+		return
+	}
 
-    buf := new(bytes.Buffer)
+	buf := new(bytes.Buffer)
 
-    // Execute the template set, passing the dynamic data with the current
-    // year injected.
-    err := ts.Execute(buf, app.addDefaultData(td, r))
-    if err != nil {
-        app.serverError(w, err)
-        return
-    }
+	// Execute the template set, passing the dynamic data with the current
+	// year injected.
+	err := ts.Execute(buf, app.addDefaultData(td, r))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
-    buf.WriteTo(w)
-} 
+	buf.WriteTo(w)
+}
